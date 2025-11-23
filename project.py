@@ -32,6 +32,26 @@ NUM_CHROMOSOMES = 1000
 NUM_PARENTS = 100 # must be even
 SIMILARITY_COEFF = .25
 
+# chord global variables
+measure_num = 0
+# a_min = chord.Chord([45, 48, 52], quarterLength = 2) # A minor
+# b_dim = chord.Chord([47, 50, 53], quarterLength = 2) # B diminished
+# c_maj = chord.Chord([48, 52, 55], quarterLength = 2) # C major
+# d_min = chord.Chord([50, 53, 57], quarterLength = 2) # D minor
+# e_min = chord.Chord([52, 55, 59], quarterLength = 2) # E minor
+# f_maj = chord.Chord([53, 57, 60], quarterLength = 2) # F major
+# g_maj = chord.Chord([55, 59, 62], quarterLength = 2) # G major
+
+a_min = [45, 48, 52] # A minor
+b_dim = [47, 50, 53] # B diminished
+c_maj = [48, 52, 55] # C major
+d_min = [50, 53, 57] # D minor
+e_min = [52, 55, 59] # E minor
+f_maj = [53, 57, 60] # F major
+g_maj = [55, 59, 62] # G major
+
+chord_list = [a_min, b_dim, c_maj, d_min, e_min, f_maj, g_maj]
+
 # all voices
 voice1 = stream.Part()    
 voice2 = stream.Part()    
@@ -100,25 +120,61 @@ def generate_subject_rhythm():
     global NOTES_PER_SECTION
 
     note_options = [0.5, 1, 1.5, 2]
+    default_weights = [20, 50, 5, 40]
+    note_weights = default_weights.copy()
     sum = 0
     curr = 0
-    prev = 0
+    prev1 = 0
+    prev2 = 0
     rhythm = []
     while sum < 32:
-        curr = random.choice(note_options)
+        while True:
+            # change note weights based on previous/sum
+            
+            # make it likely to get back on the downbeat if we are off of it
+            if sum % 1 != 0:
+                note_weights = [80, 10, 20, 0]
+                
+            # make sycopated half notes unlikely
+            if sum % 2 != 0:
+                note_weights[3] = max(note_weights[3] - 20, 0)
+                
+            # want strings of eighth notes
+            if prev1 == .5 and prev2 == .5:
+                note_weights[0] += 40
+                
+            # make it likely to end w half note
+            if sum == 30:
+                note_weights[3] = 80
+                
+            # get back to downbeat if we get dotted quarter
+            if prev1 == 1.5:
+                note_weights = [80, 0, 20, 0]
+                
+            # no three half notes in a row
+            if prev1 == 2 and prev2 == 2:
+                note_weights[3] = 0
+                
+            curr = random.choices(note_options, weights=note_weights)[0]
 
-        # cannot have 2 after 0.5
-        while prev == 0.5 and curr == 2:
-            curr = random.choice(note_options)
-        # cannot have 2 after 2
-        while prev == 2 and curr == 2:
-            curr = random.choice(note_options)
+            # no ties over bar lines
+            if (sum % 4 ) > (sum + curr) % 4 and (sum + curr) % 4 != 0:
+                continue
+            
+            # don't start half notes off of downbeat
+            if curr == 2 and sum % 1 != 0:
+                continue
 
-        while sum + curr > 32:
-            curr = random.choice(note_options)
+            # must to sum to exactly 32
+            if sum + curr > 32:
+                continue
+            break
+        
         rhythm.append(curr)
         sum += curr
-        prev = curr
+        prev1 = curr
+        prev2 = prev1
+        note_weights = default_weights.copy()
     print(rhythm)
     subject_rhythm = rhythm
     NOTES_PER_SECTION = len(rhythm)
@@ -134,10 +190,13 @@ def generate_monte_carlo():
     while curr < NOTES_PER_SECTION:
         while True:
             next = random.randint(0,6)
+            # chord tone must resolve to chord tone
             if prev in [2, 4, 6, 7] and next in [2, 4, 6, 7]:
                 continue
+            # no more than two consecutive notes
             if next == prev:
                 continue
+            # no more than two steps between consecutive notes
             if abs(next - prev) > 2:
                 continue
             break 
@@ -435,14 +494,36 @@ def make_voice(v1, v2, v3, subject_sequence):
 # make_chord_voice4: adds chords to voice4
 #
 def make_chord_voice4():
-    all_chords = [48, 53, 43, 49, 45] #C, F, G, Dm, Am
+    global chord_list
+    
     for i in range(0, 96):
-        c = random.choice(all_chords)
-        if c == 49 or c == 45:
-            voice4.append(chord.Chord([c, c+3, c+7], quarterLength = 2))
-        else:
-            voice4.append(chord.Chord([c, c+4, c+7], quarterLength = 2))
+        prev = None
+        
+        
+        # insert rules here... 
+        while True:
+            curr = random.choice(chord_list)
+            # end each section w I chord
+            if (i + 1) % 32 == 0 and curr != c_maj:
+                continue
+            
+            # start w a safe chord
+            if (i % 32 == 0) and (curr in [a_min, b_dim, d_min, e_min]):
+                continue
+           
+                
+            # "weirder" chords need stricter rules
+            if prev is not None and (prev == a_min and curr in [a_min, b_dim, e_min]):
+                continue
+            if prev is not None and (prev == b_dim and curr not in [c_maj, a_min]):
+                continue
+            if prev is not None and (prev == e_min and curr not in [c_maj, a_min, f_maj]):
+                continue
+            
+            break
 
+        voice4.append(chord.Chord(curr, quarterLength = 4))
+        prev = curr
 
 def main(): 
 
@@ -463,15 +544,15 @@ def main():
 
     top_level = stream.Score()
     
-    # transpose voice2 1 octave down
-    for i in range(0, len(voice2)):
-        if isinstance(voice2[i], note.Note):
-            voice2[i].pitch.midi -= 12
+    # transpose voice1 1 octave up
+    for i in range(0, len(voice1)):
+        if isinstance(voice1[i], note.Note):
+            voice1[i].pitch.midi += 12
         
     # transpose voice3 1 octave down
     for i in range(0, len(voice3)):
-        if isinstance(voice2[i], note.Note):
-            voice2[i].pitch.midi -= 12
+        if isinstance(voice3[i], note.Note):
+            voice3[i].pitch.midi -= 12
 
     make_chord_voice4()
 
