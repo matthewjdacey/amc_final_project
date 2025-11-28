@@ -530,10 +530,10 @@ def main():
     v1 = []
     v2 = []
     v3 = []
-    for i in grammar_seq:
-        v1.append(i[0])
-        v2.append(i[1])
-        v3.append(i[2])
+    for roles in grammar_seq:
+        v1.append(roles[0])
+        v2.append(roles[1])
+        v3.append(roles[2])
 
     print(grammar_seq)
 
