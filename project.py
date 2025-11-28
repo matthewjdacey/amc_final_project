@@ -26,6 +26,11 @@ ALL_NOTES = ['C', 'D', 'E', 'F', 'G', 'A', 'B']
 NOTES_PER_SECTION = 0
 SER_ROT_COUNTER = 0
 
+# grammar constants
+BARS_PER_PHRASE = 8
+PHRASES_PER_SECTION = 4
+BARS_PER_SECTION = BARS_PER_PHRASE * PHRASES_PER_SECTION
+
 # ga global variables
 NUM_GENERATIONS = 50
 NUM_CHROMOSOMES = 1000
@@ -481,12 +486,17 @@ def each_part(i, voice, sub_seq):
 #
 # make_voice: calls each_part to append values into voices
 #
-def make_voice(v1, v2, v3, subject_sequence):
-    sub_seq = subject_sequence
+def make_voice(v1, v2, v3, main_subject, dev_subject):
+
     for i in range(0, len(v1)):
-        each_part(v1[i], voice1, sub_seq)
-        each_part(v2[i], voice2, sub_seq)
-        each_part(v3[i], voice3, sub_seq)
+        if PHRASES_PER_SECTION <= i < 2 * PHRASES_PER_SECTION:
+            curr_subject = dev_subject
+        else:
+            curr_subject = main_subject
+
+        each_part(v1[i], voice1, curr_subject)
+        each_part(v2[i], voice2, curr_subject)
+        each_part(v3[i], voice3, curr_subject)
 
 #
 # make_chord_voice4: adds chords to voice4
@@ -537,8 +547,10 @@ def main():
 
     print(grammar_seq)
 
-    subject_sequence = generate_monte_carlo()
-    make_voice(v1, v2, v3, subject_sequence)
+    main_subject_sequence = generate_monte_carlo()
+    dev_subject_sequence = generate_monte_carlo()
+
+    make_voice(v1, v2, v3, main_subject_sequence, dev_subject_sequence)
 
     top_level = stream.Score()
     
