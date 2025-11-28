@@ -419,9 +419,9 @@ def mate(parent1, parent2):
 # generate_grammar: generates the grammar sequence for the piece
 #
 def generate_grammar():
-    exp = exp_grammar[random.randint(0, 2)]
-    dev = dev_grammar[random.randint(0, 3)]
-    final = final_grammar[random.randint(0, 2)]
+    exp = random.choice(exp_grammar)
+    dev = random.choice(dev_grammar)
+    final = random.choice(final_grammar)
 
     grammar_seq = []
     # making grammar
@@ -484,8 +484,6 @@ def each_part(i, voice, sub_seq):
 def make_voice(v1, v2, v3, subject_sequence):
     sub_seq = subject_sequence
     for i in range(0, len(v1)):
-        if v1[i] == 'S' or v2[i] == 'S' or v3[i] == 'S':
-            sub_seq = generate_monte_carlo()
         each_part(v1[i], voice1, sub_seq)
         each_part(v2[i], voice2, sub_seq)
         each_part(v3[i], voice3, sub_seq)
