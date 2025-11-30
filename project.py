@@ -20,6 +20,7 @@ import sys
 import random
 from music21 import *
 from selection import *
+from rhythm_gen import *
 
 # overall global variables
 C_MIDI = 60  # middle C in midi notation
@@ -63,9 +64,15 @@ voice1 = stream.Part()
 voice2 = stream.Part()    
 voice3 = stream.Part()
 voice4 = stream.Part()
+
+# voice1.insert(0, instrument.Violin())
+# voice2.insert(0, instrument.Viola())
+# voice3.insert(0, instrument.Violoncello())
+# voice4.insert(0, instrument.Piano())
+
 voice1.append(tempo.MetronomeMark(number=120))
 
-subject_rhythm = []
+NOTES_PER_SECTION, subject_rhythm = generate_subject_rhythm()
 
 # grammar phrases
 exp_grammar = ["KLKL", "KLLL", "KKLL"]
@@ -115,76 +122,7 @@ def notes_to_midi(note):
         return 69
     elif note == 'B':
         return 71
-    
-#
-# generate_subject_rhythm: generates an 8-bar rhythm that is standard for all
-#                          subject voices in the piece using the Monte Carlo 
-#                          method
-#
-def generate_subject_rhythm():
-    global subject_rhythm
-    global NOTES_PER_SECTION
 
-    note_options = [0.5, 1, 1.5, 2]
-    default_weights = [20, 50, 5, 40]
-    note_weights = default_weights.copy()
-    sum = 0
-    curr = 0
-    prev1 = 0
-    prev2 = 0
-    rhythm = []
-    while sum < 32:
-        while True:
-            # change note weights based on previous/sum
-            
-            # make it likely to get back on the downbeat if we are off of it
-            if sum % 1 != 0:
-                note_weights = [80, 10, 20, 0]
-                
-            # make sycopated half notes unlikely
-            if sum % 2 != 0:
-                note_weights[3] = max(note_weights[3] - 20, 0)
-                
-            # want strings of eighth notes
-            if prev1 == .5 and prev2 == .5:
-                note_weights[0] += 40
-                
-            # make it likely to end w half note
-            if sum == 30:
-                note_weights[3] = 80
-                
-            # get back to downbeat if we get dotted quarter
-            if prev1 == 1.5:
-                note_weights = [80, 0, 20, 0]
-                
-            # no three half notes in a row
-            if prev1 == 2 and prev2 == 2:
-                note_weights[3] = 0
-                
-            curr = random.choices(note_options, weights=note_weights)[0]
-
-            # no ties over bar lines
-            if (sum % 4 ) > (sum + curr) % 4 and (sum + curr) % 4 != 0:
-                continue
-            
-            # don't start half notes off of downbeat
-            if curr == 2 and sum % 1 != 0:
-                continue
-
-            # must to sum to exactly 32
-            if sum + curr > 32:
-                continue
-            break
-        
-        rhythm.append(curr)
-        sum += curr
-        prev1 = curr
-        prev2 = prev1
-        note_weights = default_weights.copy()
-    print(rhythm)
-    subject_rhythm = rhythm
-    NOTES_PER_SECTION = len(rhythm)
-        
 #
 # generate_monte_carlo: generates the pitch sequence for the subject
 #
@@ -316,14 +254,18 @@ def serial_rotation_rhythm():
 # initialize_population: function for genetic algorithm that generates
 #                        all initial chromosomes
 #
-def initialize_population():
+def initialize_population(subject_rhythm):
     all_chromosomes = []
     for i in range(0, NUM_CHROMOSOMES):
-        one_chromo = []
-        for j in range(0, NOTES_PER_SECTION):
+        chromo_pitches = []
+        chromo_rhythm = generate_cs_rhythm(subject_rhythm)
+        # print("chromo rhythm: ", chromo_rhythm)
+        for j in range(0, len(chromo_rhythm)):
             one_note = ALL_NOTES[random.randint(0, 6)]
-            one_chromo.append(one_note)
-        all_chromosomes.append(one_chromo)
+            chromo_pitches.append(one_note)
+        chromo = (chromo_pitches, chromo_rhythm)
+        
+        all_chromosomes.append(chromo)
     return all_chromosomes
 
 
@@ -332,10 +274,54 @@ def initialize_population():
 #                   "cost" for all chromosomes. The higher cost implies less
 #                   less similar to the subject sequence
 #
-def fitness_functon(sub_seq, one_chromo):
+def fitness_functon(sub_pitches, sub_rhythm, one_chromo):
     score = 0
-    for i in range(0, len(one_chromo)):
-        score += helper_fitness(sub_seq[i], one_chromo[i])
+    sub_notes = []
+    chromo_notes = []
+    
+    for i in range(0, len(sub_rhythm)):
+        if sub_rhythm[i] == .5:
+            sub_notes.append(sub_pitches[i])
+        elif sub_rhythm[i] == 1:
+            sub_notes.append(sub_pitches[i])
+            sub_notes.append(sub_pitches[i])
+        elif sub_rhythm[i] == 1.5:
+            sub_notes.append(sub_pitches[i])
+            sub_notes.append(sub_pitches[i])
+            sub_notes.append(sub_pitches[i])
+        else: # sub_rhythm[i] == 2
+            sub_notes.append(sub_pitches[i])
+            sub_notes.append(sub_pitches[i])
+            sub_notes.append(sub_pitches[i])
+            sub_notes.append(sub_pitches[i])
+    
+    chromo_pitches = one_chromo[0]
+    chromo_rhythm = one_chromo[1]
+    
+    # print("chromo pitches: ", chromo_pitches)
+    # print("chromo rhythm: ", chromo_rhythm)
+
+    for i in range(0, len(chromo_rhythm)):
+        if chromo_rhythm[i] == .5:
+            chromo_notes.append(chromo_pitches[i])
+        elif chromo_rhythm[i] == 1:
+            chromo_notes.append(chromo_pitches[i])
+            chromo_notes.append(chromo_pitches[i])
+        elif chromo_rhythm[i] == 1.5:
+            chromo_notes.append(chromo_pitches[i])
+            chromo_notes.append(chromo_pitches[i])
+            chromo_notes.append(chromo_pitches[i])
+        else: # chromo_rhythm[i] == 2
+            chromo_notes.append(chromo_pitches[i])
+            chromo_notes.append(chromo_pitches[i])
+            chromo_notes.append(chromo_pitches[i])
+            chromo_notes.append(chromo_pitches[i])
+
+    # print(len(sub_notes), len(chromo_notes))
+
+    for i in range(0, len(sub_notes)):
+        score += helper_fitness(sub_notes[i], chromo_notes[i])
+    
     return score
 
 
@@ -364,14 +350,14 @@ def helper_fitness(sub_seq, chromo):
 # genetic_algorithm: main genetic algorithm function that generates the
 #                    pitch sequence for the counter subject
 #
-def genetic_algorithm(sub_seq):
-    chromos = initialize_population()
+def genetic_algorithm(sub_pitches, sub_rhythm):
+    chromos = initialize_population(sub_rhythm)
     
     count = 0
     while count < NUM_GENERATIONS:
-        
-        chromos.sort(key=lambda x: fitness_functon(sub_seq, x))
-        
+        chromos.sort(key=lambda x: fitness_functon(sub_pitches, sub_rhythm, x))    
+
+
         desired_index = int(SIMILARITY_COEFF * NUM_CHROMOSOMES)
         if desired_index - NUM_PARENTS < 0:
             low_i = 0
@@ -415,14 +401,45 @@ def genetic_algorithm(sub_seq):
 #
 # fitness_function: function for genetic algorithm that mates the chromosomes
 #
+
+
 def mate(parent1, parent2):
-    child = []
-    for i in range(0, len(parent1)):
-        if i < len(parent1) /2:
-            child.append(parent1[i])
-        else:
-            child.append(parent2[i])
-    return child
+    child_pitches = []
+    child_rhythm = []
+    
+    valid_split_point = False
+    par1_split_point = -1
+    par2_split_point = -1
+    
+    while not valid_split_point:
+        # randomly choose where 1st parent's genes end and 2nd parent's genes begin
+        par1_split_point = random.randint(0, len(parent1[1]) -1)
+        
+        rhythm_sum = 0
+        # find what beat split point falls on
+        for i in range(0, par1_split_point):
+            rhythm_sum += parent1[1][i]
+        
+        sum = 0
+        index = 0
+        # get index in parent 2 that starts on split point beat
+        while sum < rhythm_sum:
+            sum += parent2[1][index]
+            index += 1
+        
+        # if they line up perfectly continue, if not repeat randomness
+        if sum == rhythm_sum:
+            valid_split_point = True
+            par2_split_point = index
+
+
+    for i in range(0, par1_split_point):
+        child_pitches.append(parent1[0][i])
+        child_rhythm.append(parent1[1][i])
+    for i in range(par2_split_point, len(parent2[1])):
+        child_pitches.append(parent2[0][i])
+        child_rhythm.append(parent2[1][i])
+    return (child_pitches, child_rhythm)
 
 
 #
@@ -466,7 +483,10 @@ def random_grammar(letter):
 def mix_grammar(sequence):
     new_seq = []
     for i in sequence:
-        shuffled = ''.join(random.sample(i, len(i)))  #random permutation
+        shuffled = list(i[0])
+        random.shuffle(shuffled)
+        shuffled = str(''.join(shuffled))
+        
         new_seq.append(shuffled)
     return new_seq
 
@@ -476,16 +496,22 @@ def mix_grammar(sequence):
 #            to respective voices
 #
 def each_part(i, voice, sub_seq):
+    global subject_rhythm
+    
     if i == 'S':
         insert_subject(sub_seq, voice)
     elif i == 'A':
         generate_serialism(sub_seq, voice)
     elif i == 'C':
-        new_cs = genetic_algorithm(sub_seq)
-        for j in range(0, len(new_cs)):
-            voice.append(note.Note(new_cs[j], quarterLength = subject_rhythm[j % NOTES_PER_SECTION]))
+        # new_cs = genetic_algorithm(sub_seq) # change when rhythm done
+        # cs_rhythm_len, new_cs_rhythm = generate_cs_rhythm(sub_seq)
+        new_cs_pitches, new_cs_rhythm = genetic_algorithm(sub_seq, subject_rhythm)
+        
+        for j in range(0, len(new_cs_pitches)):
+            voice.append(note.Note(new_cs_pitches[j], quarterLength = new_cs_rhythm[j]))
     else: # i == '_'
             insert_rest(voice)
+
 
 
 #
@@ -540,7 +566,7 @@ def make_chord_voice4():
 
 def main(): 
 
-    generate_subject_rhythm()
+    # generate_subject_rhythm()
     grammar_seq = generate_grammar()
     v1 = []
     v2 = []
