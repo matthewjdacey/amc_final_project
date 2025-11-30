@@ -19,6 +19,7 @@
 import sys
 import random
 from music21 import *
+from selection import *
 
 # overall global variables
 C_MIDI = 60  # middle C in midi notation
@@ -26,11 +27,16 @@ ALL_NOTES = ['C', 'D', 'E', 'F', 'G', 'A', 'B']
 NOTES_PER_SECTION = 0
 SER_ROT_COUNTER = 0
 
+# grammar constants
+BARS_PER_PHRASE = 8
+PHRASES_PER_SECTION = 4
+BARS_PER_SECTION = BARS_PER_PHRASE * PHRASES_PER_SECTION
+
 # ga global variables
 NUM_GENERATIONS = 50
 NUM_CHROMOSOMES = 1000
 NUM_PARENTS = 100 # must be even
-SIMILARITY_COEFF = .25
+SIMILARITY_COEFF = 0.17
 
 # chord global variables
 measure_num = 0
@@ -380,17 +386,21 @@ def genetic_algorithm(sub_seq):
 
 
         # select + mate parents
-        parents = chromos[low_i:high_i]
+        # parents = chromos[low_i:high_i]
         new_generation = []
-        for i in range(0, NUM_CHROMOSOMES):
-            # cant mate w itself
-            par1_i = random.randint(0, len(parents)-1)
-            par2_i = random.randint(0, len(parents)-1)
-            while par1_i == par2_i:
-                par2_i = random.randint(0, len(parents)-1)
+        for _ in range(NUM_CHROMOSOMES):
+        #     # cant mate w itself
+        #     par1_i = random.randint(0, len(parents)-1)
+        #     par2_i = random.randint(0, len(parents)-1)
+        #     while par1_i == par2_i:
+        #         par2_i = random.randint(0, len(parents)-1)
             
-            parent1 = parents[par1_i]
-            parent2 = parents[par2_i]
+        #     parent1 = parents[par1_i]
+        #     parent2 = parents[par2_i]
+
+        #normal distribution selection
+            parent1 = norm_select(chromos, SIMILARITY_COEFF)
+            parent2 = norm_select(chromos, SIMILARITY_COEFF)
             child = mate(parent1, parent2)
             new_generation.append(child)
         
@@ -419,9 +429,9 @@ def mate(parent1, parent2):
 # generate_grammar: generates the grammar sequence for the piece
 #
 def generate_grammar():
-    exp = exp_grammar[random.randint(0, 2)]
-    dev = dev_grammar[random.randint(0, 3)]
-    final = final_grammar[random.randint(0, 2)]
+    exp = random.choice(exp_grammar)
+    dev = random.choice(dev_grammar)
+    final = random.choice(final_grammar)
 
     grammar_seq = []
     # making grammar
@@ -481,14 +491,17 @@ def each_part(i, voice, sub_seq):
 #
 # make_voice: calls each_part to append values into voices
 #
-def make_voice(v1, v2, v3, subject_sequence):
-    sub_seq = subject_sequence
+def make_voice(v1, v2, v3, main_subject, dev_subject):
+
     for i in range(0, len(v1)):
-        if v1[i] == 'S' or v2[i] == 'S' or v3[i] == 'S':
-            sub_seq = generate_monte_carlo()
-        each_part(v1[i], voice1, sub_seq)
-        each_part(v2[i], voice2, sub_seq)
-        each_part(v3[i], voice3, sub_seq)
+        if PHRASES_PER_SECTION <= i < 2 * PHRASES_PER_SECTION:
+            curr_subject = dev_subject
+        else:
+            curr_subject = main_subject
+
+        each_part(v1[i], voice1, curr_subject)
+        each_part(v2[i], voice2, curr_subject)
+        each_part(v3[i], voice3, curr_subject)
 
 #
 # make_chord_voice4: adds chords to voice4
@@ -532,15 +545,17 @@ def main():
     v1 = []
     v2 = []
     v3 = []
-    for i in grammar_seq:
-        v1.append(i[0])
-        v2.append(i[1])
-        v3.append(i[2])
+    for roles in grammar_seq:
+        v1.append(roles[0])
+        v2.append(roles[1])
+        v3.append(roles[2])
 
     print(grammar_seq)
 
-    subject_sequence = generate_monte_carlo()
-    make_voice(v1, v2, v3, subject_sequence)
+    main_subject_sequence = generate_monte_carlo()
+    dev_subject_sequence = generate_monte_carlo()
+
+    make_voice(v1, v2, v3, main_subject_sequence, dev_subject_sequence)
 
     top_level = stream.Score()
     
