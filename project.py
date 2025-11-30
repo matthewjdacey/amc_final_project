@@ -19,6 +19,7 @@
 import sys
 import random
 from music21 import *
+from selection import *
 
 # overall global variables
 C_MIDI = 60  # middle C in midi notation
@@ -35,7 +36,7 @@ BARS_PER_SECTION = BARS_PER_PHRASE * PHRASES_PER_SECTION
 NUM_GENERATIONS = 50
 NUM_CHROMOSOMES = 1000
 NUM_PARENTS = 100 # must be even
-SIMILARITY_COEFF = .25
+SIMILARITY_COEFF = 0.17
 
 # chord global variables
 measure_num = 0
@@ -385,17 +386,21 @@ def genetic_algorithm(sub_seq):
 
 
         # select + mate parents
-        parents = chromos[low_i:high_i]
+        # parents = chromos[low_i:high_i]
         new_generation = []
-        for i in range(0, NUM_CHROMOSOMES):
-            # cant mate w itself
-            par1_i = random.randint(0, len(parents)-1)
-            par2_i = random.randint(0, len(parents)-1)
-            while par1_i == par2_i:
-                par2_i = random.randint(0, len(parents)-1)
+        for _ in range(NUM_CHROMOSOMES):
+        #     # cant mate w itself
+        #     par1_i = random.randint(0, len(parents)-1)
+        #     par2_i = random.randint(0, len(parents)-1)
+        #     while par1_i == par2_i:
+        #         par2_i = random.randint(0, len(parents)-1)
             
-            parent1 = parents[par1_i]
-            parent2 = parents[par2_i]
+        #     parent1 = parents[par1_i]
+        #     parent2 = parents[par2_i]
+
+        #normal distribution selection
+            parent1 = norm_select(chromos, SIMILARITY_COEFF)
+            parent2 = norm_select(chromos, SIMILARITY_COEFF)
             child = mate(parent1, parent2)
             new_generation.append(child)
         
