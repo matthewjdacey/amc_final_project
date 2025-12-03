@@ -34,6 +34,11 @@ def generate_subject_rhythm():
     return NOTES_PER_SECTION, sub_rhythm
 
 def measure_activity(sub_rhythm):
+    """
+    returns a list of real number activity factors, where a higher activity indicates
+    faster-moving, shorter notes and a lower acitivity indicates slower-moving,
+    longer notes
+    """
     activity_factors = []
     subj_index = 0
     for i in range(0, BARS_PER_PHRASE): 
@@ -53,6 +58,10 @@ def measure_activity(sub_rhythm):
 
 
 def generate_cs_rhythm():
+    """
+    Generate counter-subject rhythm using a Monte Carlo method and an activity
+    to balance that of the subject
+    """
     global activity 
     return generate_rhythm(activity)
 

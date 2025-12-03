@@ -19,21 +19,21 @@
     </scaling>
   </defaults>
   <part-list>
-    <score-part id="P95100e2c2b09b734d6be5ad405d741ca">
+    <score-part id="P540860dcbbec4025e9584887788a0c12">
       <part-name />
     </score-part>
-    <score-part id="Pfbe5c8d79d3e8760ae22101237b3fb7a">
+    <score-part id="P164584880d4734fcf926fdb6bfd240e0">
       <part-name />
     </score-part>
-    <score-part id="P082c91995ed33a98afd5797a9157ed98">
+    <score-part id="P9d083d745226d0eb2eb48049cebf6ea0">
       <part-name />
     </score-part>
-    <score-part id="P60c8311a01d8c4e214e994379a3899d6">
+    <score-part id="P012cdc6456ac35067fcf00ceb5f26c3e">
       <part-name />
     </score-part>
   </part-list>
   <!--=========================== Part 1 ===========================-->
-  <part id="P95100e2c2b09b734d6be5ad405d741ca">
+  <part id="P540860dcbbec4025e9584887788a0c12">
     <!--========================= Measure 1 ==========================-->
     <measure implicit="no" number="1">
       <attributes>
@@ -3410,7 +3410,7 @@
     </measure>
   </part>
   <!--=========================== Part 2 ===========================-->
-  <part id="Pfbe5c8d79d3e8760ae22101237b3fb7a">
+  <part id="P164584880d4734fcf926fdb6bfd240e0">
     <!--========================= Measure 1 ==========================-->
     <measure implicit="no" number="1">
       <attributes>
@@ -6187,7 +6187,7 @@
     </measure>
   </part>
   <!--=========================== Part 3 ===========================-->
-  <part id="P082c91995ed33a98afd5797a9157ed98">
+  <part id="P9d083d745226d0eb2eb48049cebf6ea0">
     <!--========================= Measure 1 ==========================-->
     <measure implicit="no" number="1">
       <attributes>
@@ -9738,7 +9738,7 @@
     </measure>
   </part>
   <!--=========================== Part 4 ===========================-->
-  <part id="P60c8311a01d8c4e214e994379a3899d6">
+  <part id="P012cdc6456ac35067fcf00ceb5f26c3e">
     <!--========================= Measure 1 ==========================-->
     <measure implicit="no" number="1">
       <attributes>

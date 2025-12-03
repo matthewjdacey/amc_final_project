@@ -109,9 +109,6 @@ def helper_fitness(sub_seq, chromo):
     return interval_grade
 
 
-#
-# genetic_algorithm: 
-#
 def genetic_algorithm(sub_pitches, sub_rhythm):
     """
     generates the pitch sequence for the counter subject

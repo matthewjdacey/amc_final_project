@@ -73,8 +73,6 @@ def each_part(i, voice, sub_seq):
     elif i == 'A':
         generate_serialism(sub_seq, subject_rhythm, notes_per_section, voice)
     elif i == 'C':
-        # new_cs = genetic_algorithm(sub_seq) # change when rhythm done
-        # cs_rhythm_len, new_cs_rhythm = generate_cs_rhythm(sub_seq)
         new_cs_pitches, new_cs_rhythm = genetic_algorithm(sub_seq, subject_rhythm)
         
         for j in range(0, len(new_cs_pitches)):
@@ -150,7 +148,7 @@ def main():
         top_level.write('midi', fp="out.midi")
     if ("-s" in sys.argv):
         top_level.write(fp="out.xml")
-    else:
+    if len(sys.argv) == 1:
         top_level.show('text')
 
 if __name__ == "__main__":
