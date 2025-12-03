@@ -4,7 +4,7 @@ Fall 2025 | Final Project
 Authors: Matthew Dacey (mdacey02), Sam Lev (slev01),
          Begüm Ugurlu (bugurl01), Kimaya Vaid (kvaid01)
 
-Generates pitchs sequence for the subject
+Generates pitch sequence for the subject
 """
 
 import random

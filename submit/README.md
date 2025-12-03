@@ -10,7 +10,25 @@ The goals of this project were:
 4. **Produce output that is musically intelligible**, not merely technically correct.
 
 ## Command-Line Arguments
-`python3 project.py -m`
+The program can be run manually from the directory containing all project files with `python3 project.py`
+
+The 0 or more of the following command-line flags can be added:
+- `-s` will create a file called `out.xml` with sheet music of the generated piece
+- `-m` will create a file called `out.midi` of the generated piece
+- `-fixed` will fix the random number generators to determinisitically generate the same piece as was presented in class
+
+Executing the `run_project.sh` script will run the program with all 3 arguments, deterministically generating both an xml and midi file.
+
+## Files
+- `answer.py` generates an answer to the subject using serialism
+- `chords.py` generates chord progression for the full piece
+- `counter_subject.py` generates a harmonious counter subject using a genetic algorithm
+- `grammar.py` derives the high-level structure of the composition from our encoded grammar
+- `project.py` contains the main program control flow; manages all of the voices and roles; and renders the piece to music21
+- `rhythm_gen.py` generates related and interacting rhythms for the subject and counter-subject
+- `subject.py` generates a pitch sequence for the subjects of the piece
+-  `top_level.py` contains top-level global constants and functions
+
 
 ## High-Level Overview
 Each algorithm is paired with a specific musical role from traditional fugue writing:
