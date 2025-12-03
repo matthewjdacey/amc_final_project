@@ -1,5 +1,10 @@
 ﻿### Final Project – Algorithmic Music Composition (CS150)
 
+## Group members
+Matthew Dacey (mdacey02), Sam Lev (slev01), Begüm Ugurlu (bugurl01), Kimaya Vaid (kvaid01)
+
+Submitted by Sam Lev (slev01)
+
 ## Introduction
 This project implements a multi-algorithm, fugue-inspired composition system that generates a complete three-voiced musical work plus harmonic accompaniment. Rather than using a single algorithm in isolation, this project integrates several algorithmic approaches—Monte Carlo methods, Serialism, Genetic Algorithms, and Grammar-Based Structure—to produce a cohesive, musically meaningful piece inspired by the architecture of a Bach fugue.
 
