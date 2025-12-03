@@ -9,6 +9,8 @@ The goals of this project were:
 3. **Engineer interactions between algorithms** so the musical lines reinforce each other instead of clashing.  
 4. **Produce output that is musically intelligible**, not merely technically correct.
 
+## Command-Line Arguments
+`python3 project.py -m`
 
 ## High-Level Overview
 Each algorithm is paired with a specific musical role from traditional fugue writing:
