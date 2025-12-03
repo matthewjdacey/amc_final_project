@@ -13,6 +13,7 @@ using a different algorithmic approach(es).
 
 import sys
 import random
+import numpy as np
 from music21 import *
 from top_level import *
 from rhythm_gen import *
@@ -21,6 +22,11 @@ from subject import generate_monte_carlo
 from counter_subject import genetic_algorithm
 from answer import generate_serialism
 from chords import make_chord_voice
+
+if "-fix" in sys.argv:
+    print("fixing")
+    random.seed(6)
+    np.random.seed(6)
 
 # global variables
 # all voices
@@ -94,9 +100,6 @@ def make_voice(v1, v2, v3, main_subject, dev_subject):
 
 
 def main(): 
-    if "-fix" in sys.argv:
-        random.seed(1087)
-
     # derive structure from grammar
     grammar_seq = generate_grammar()
     v1 = []
@@ -145,8 +148,8 @@ def main():
     # Play midi, output sheet music, or print the contents of the stream
     if ("-m" in sys.argv):
         top_level.write('midi', fp="out.midi")
-    elif ("-s" in sys.argv):
-        top_level.write(fp="proj.xml")
+    if ("-s" in sys.argv):
+        top_level.write(fp="out.xml")
     else:
         top_level.show('text')
 

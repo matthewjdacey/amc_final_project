@@ -9,6 +9,7 @@ Generates a harmonius counter subject using a genetic algorithm
 
 from top_level import *
 from rhythm_gen import *
+import numpy as np
 
 # constants
 NUM_GENERATIONS = 50
@@ -176,8 +177,6 @@ def mate(parent1, parent2):
         child_pitches.append(parent2[0][i])
         child_rhythm.append(parent2[1][i])
     return (child_pitches, child_rhythm)
-
-import numpy as np
 
 def norm_select(sorted_chromos, similarity_coeff):
     """
