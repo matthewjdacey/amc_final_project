@@ -123,7 +123,8 @@ This keeps the texture tonal.
 ---
 
 ## Authors
-Kimaya Vaid, Matt, Sam
+Begum Ugurlu, Kimaya Vaid, Matthew Dacey, Sam Lev
+
 
 
 
